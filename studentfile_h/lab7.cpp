@@ -1,50 +1,58 @@
+
 #include <iostream>
 #include <vector>
-#include <algorithm>
+#include <queue>
 
-class StudentSolution {
-public:
-    static std::vector<int> Torneo(const std::vector<int>& habilidades, int N, int K) {
-        std::vector<int> players(habilidades);
-        std::vector<int> wins(players.size(), 0);
-        int gamesPlayed = 0;
-        int winner, loser; 
+using namespace std;
 
-        while (gamesPlayed < K) {
-            std::sort(players.rbegin(), players.rend());
+vector<int> reordenarVector(vector<int> vec, int perdedor, int tam) {
+    for (int i = 0; i < tam - 1; i++) {
+        if (vec[i] == perdedor) {
+            swap(vec[i], vec[tam - 1]);
+        }
+    }
+    return vec;
+}
 
-            winner = players[0];
+vector<int> Torneo(vector<int> habilidades, int N, int K) {
+    int tam = habilidades.size();
+    int ganador = 0;
+    int perdedor = 0;
 
-            loser = players[1];
+    queue<int> torneoQueue;
 
-            wins[0]++;
+    for (int i = 2; i < tam; i++) {
+        torneoQueue.push(habilidades[i]);
+    }
 
-            players.erase(players.begin() + 1);
-            players.push_back(loser);
+    int rondasGanadas = 0;
+    int jugador1 = habilidades[0];
+    int jugador2 = habilidades[1];
 
-            
-            if (wins[0] >= N) {
-                players.push_back(winner);
-                players.erase(players.begin());
-            }
-
-            gamesPlayed++;
+    vector<int> resultado(2);
+    while (K > 0) {
+        if (jugador1 > jugador2) {
+            rondasGanadas++;
+            resultado = {jugador2, jugador1};
+            torneoQueue.push(jugador2);
+        } else {
+            rondasGanadas = 1;
+            resultado = {jugador1, jugador2};
+            torneoQueue.push(jugador1);
+            jugador1 = jugador2;
         }
 
-        std::vector<int> result = {loser, winner};
-        return result;
+        if (rondasGanadas == N) {
+            torneoQueue.push(jugador1);
+            jugador1 = torneoQueue.front();
+            torneoQueue.pop();
+            rondasGanadas = 0;
+        }
+        jugador2 = torneoQueue.front();
+        torneoQueue.pop();
+
+        K--;
     }
-};
 
-int main() {
-    // Ejemplo de uso
-    std::vector<int> habilidades = {1, 2, 3};
-    int N = 2;
-    int K = 2;https://www.onlinegdb.com/online_c++_compiler#tab-stdin
-
-    std::vector<int> resultado = StudentSolution::Torneo(habilidades, N, K);
-
-    std::cout << "Perdedor: " << resultado[0] << ", Ganador: " << resultado[1] << std::endl;
-
- return 0;
+    return resultado;
 }
